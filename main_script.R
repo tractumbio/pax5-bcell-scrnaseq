@@ -132,49 +132,36 @@ message(strrep("─", 70))
 gdrive_id  <- "172xgZPJNWO3eOR4can-9kSpgRIzwrv09"
 zip_path   <- "data/pax5_data.zip"
 
-# Only download if any expected .rds files are missing
-expected_files <- c(
-  "data/anselm_demux_filtered.rds",
-  "data/anselm_labeled.rds",
-  "data/lee_etat_natcom_data.rds",
-  "data/marker_modules.rds",
-  "data/pax5_targets.rds"
-)
-
 if (!dir.exists("data")) dir.create("data", recursive = TRUE)
 
-if (!all(file.exists(expected_files))) {
-  message("Downloading input data from Google Drive ...")
+message("Downloading input data from Google Drive ...")
 
-  dl_url <- paste0("https://drive.google.com/uc?export=download&id=", gdrive_id)
+dl_url <- paste0("https://drive.google.com/uc?export=download&id=", gdrive_id)
 
-  tryCatch({
-    download.file(dl_url, destfile = zip_path, method = "curl",
-                  extra = "-L -c /tmp/gdrive_cookies.txt")
+tryCatch({
+  download.file(dl_url, destfile = zip_path, method = "curl",
+                extra = "-L -c /tmp/gdrive_cookies.txt")
 
-    # Handle Google Drive large-file confirmation page
-    if (file.size(zip_path) < 10000) {
-      message("Large file confirmation required, retrying ...")
-      confirm_url <- paste0(
-        "https://drive.google.com/uc?export=download&confirm=t&id=", gdrive_id
-      )
-      download.file(confirm_url, destfile = zip_path, method = "curl",
-                    extra = "-L -b /tmp/gdrive_cookies.txt")
-    }
+  # Handle Google Drive large-file confirmation page
+  if (file.size(zip_path) < 10000) {
+    message("Large file confirmation required, retrying ...")
+    confirm_url <- paste0(
+      "https://drive.google.com/uc?export=download&confirm=t&id=", gdrive_id
+    )
+    download.file(confirm_url, destfile = zip_path, method = "curl",
+                  extra = "-L -b /tmp/gdrive_cookies.txt")
+  }
 
-    message("Unzipping data ...")
-    unzip(zip_path, exdir = "data")
-    file.remove(zip_path)
-    message("Data ready in data/")
+  message("Unzipping data ...")
+  unzip(zip_path, exdir = "data")
+  file.remove(zip_path)
+  message("Data ready in data/")
 
-  }, error = function(e) {
-    stop("Failed to download data: ", e$message,
-         "\nPlease download manually from: https://drive.google.com/file/d/",
-         gdrive_id, " and unzip into data/")
-  })
-} else {
-  message("All input data files found — skipping download.")
-}
+}, error = function(e) {
+  stop("Failed to download data: ", e$message,
+       "\nPlease download manually from: https://drive.google.com/file/d/",
+       gdrive_id, " and unzip into data/")
+})
 
 message(strrep("─", 70))
 
