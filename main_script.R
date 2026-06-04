@@ -138,7 +138,7 @@ message(strrep("─", 70))
 # ── Download input data from Zenodo ───────────────────────────────────────────
 
 zenodo_doi    <- "10.5281/zenodo.20545876"
-zenodo_id     <- sub(".*/", "", zenodo_doi)
+zenodo_id     <- sub(".*zenodo\\.", "", zenodo_doi)
 zenodo_api    <- paste0("https://zenodo.org/api/records/", zenodo_id)
 
 if (!dir.exists("data")) dir.create("data", recursive = TRUE)
