@@ -1,0 +1,11 @@
+"cell_type","pathway","gene","avg_log2FC","p_val","p_val_adj","pct.1","pct.2"
+"FoB","activated","Lcp2 Dlg3 Tnfrsf19 Iqsec2 Tgfb3 Ttll11",NA,NA,NA,NA,NA
+"FoB","represed","Fcer1g Myo1f Flt3 Serpinb6b Daam1 Prss16 Myl4 Kcnn4 Notch1 Ramp1 Emb",NA,NA,NA,NA,NA
+"Immature B","activated","Klf2 Cplx2 Atp1b1 Mgst1 Bach2 Mylip Uchl1 Ccnd3 Ptger4 Dlg3 Rpia Eps8 Siglecg Fcrla Id3 H2-Ob Tnfrsf13c Tpst1 Tcf7l2 Cd55 Crip1 Capn2 Rapgef5 Bcl2l1 Cebpg Tnfrsf19 Cd19 Dnajc21 Cd79a Plekha2 Oasl1 Prkd2 Irf8",NA,NA,NA,NA,NA
+"Immature B","represed","Ramp1 Flt3 Myo1f Myl4 Fcer1g Emb Kcnn4 Serpinb6b Vav3 Daam1 Notch1",NA,NA,NA,NA,NA
+"MzB","activated","Tcf7l2 Mybl2 Bach2 Eps8 Cplx2 Pde2a Akap12 Cd55 Dlg3 Ptgr1 Ptger4 Tnfrsf19 Atp1b1 Klf2 Oasl1 Mgst1 Ccnd3 Aldh1b1 Vpreb3 Gsn Irf8 Bcl2l1 Dnajc21 Crip1 Alpl Smarca4",NA,NA,NA,NA,NA
+"MzB","represed","P2rx7 Ppp1r12b Grap2 Satb1 Ramp1 Vav3 Il17ra Capn5 Stat2 Flt3 Myl4 Ppp3ca",NA,NA,NA,NA,NA
+"PreB","activated","Enpep Uchl1 Ifi30 Mgst1 Klf2 Cd44 Ikzf3 Fcrla Mylip Atp1b1 Siglecg Tnfrsf13c Cd55 Bcl2l1 Irf4 Bach2 Aldh1b1 Rb1 Btg1 Tpst1 Plekha2 Irf8 Epha2 Eps8 Ptger4 Slc15a4 Rpia Cd19",NA,NA,NA,NA,NA
+"PreB","represed","Dlx1 Emp1 Tnfsf11 Myo1f Prss16 Ctla2a Fxyd5 Akr1c13 Fcer1g Ramp1 Atp2b4 Cst7 Slc5a9 Emb Kcnn4 Lck Itgal Flt3 Vav3 Ppm1f Lat2 Tnni2 Cmtm7 Myl4 Adamts10",NA,NA,NA,NA,NA
+"ProB","activated","Enpep Dkk3 Dtx1 Fcrla Cd44 Lcp2 Klf2 Bcar3 Tcf7l2 Mgst1 Pea15a Id3 Aldh1b1 Arntl Irf8 Uchl1 Rpia Dusp7 Ptgr1 Irf4 H2-Ob Lef1 Prkd2 Bach2 Ifi30 Ptger4 Atp1b1 Ttll11 Bfsp2 Smarca4 Epha2 Fosl2 Crip1 Otub2 Eps8 Slamf7 Sdc4 Ikzf3 Sit1 Bst1 Dlg3 Rb1 Cd19",NA,NA,NA,NA,NA
+"ProB","represed","Tnfsf11 Ccl9 Ctla2a Myl4 Ramp1 Ifitm1 Lat2 Lck Slc5a9 Atp2b4 Emp1 Prss16 Adamts10 Ly6d Notch1 P2rx7 Cd47 Vav3 Grap2 Ncf4 Cst7 Satb1 Lsp1 Emb",NA,NA,NA,NA,NA
