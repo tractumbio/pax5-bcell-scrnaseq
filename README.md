@@ -36,9 +36,28 @@ perturbs its transcriptional programme across discrete developmental stages.
 
 ---
 
-## Reproducing the analysis
+## Quickstart
 
-All scripts should be run **from the repository root** so that relative paths resolve correctly.
+The entire analysis — from raw data to all figures — can be reproduced with a single command:
+
+```bash
+git clone https://github.com/tractumbio/pax5-bcell-scrnaseq.git
+cd pax5-bcell-scrnaseq
+Rscript main_script.R
+```
+
+`main_script.R` will automatically:
+1. **Install any missing R packages** (Seurat, fgsea, ggplot2, dplyr, tidyr, stringr)
+2. **Download all input data** from a public Google Drive link (~GB-scale zip archive, extracted into `data/`)
+3. **Run the full pipeline** in order and save all outputs into the `figures/` subfolders
+
+> **Note:** No manual data download or package installation is required. Runtime is approximately 45–90 minutes depending on hardware and internet speed.
+
+---
+
+## Reproducing the analysis step by step
+
+Individual scripts can also be run independently. All scripts must be run **from the repository root** so that relative paths resolve correctly.
 
 ### Step 1 — Data processing and annotation
 
@@ -126,8 +145,11 @@ R version ≥ 4.2 is recommended.
 
 ## Data availability
 
-Raw and processed data are available from the authors upon request.  
-See [`data/README.md`](data/README.md) for a description of each required file.
+All input data files are downloaded automatically when running `main_script.R` from a public Google Drive archive. They can also be downloaded manually from:
+
+> [https://drive.google.com/file/d/172xgZPJNWO3eOR4can-9kSpgRIzwrv09](https://drive.google.com/file/d/172xgZPJNWO3eOR4can-9kSpgRIzwrv09)
+
+Unzip the archive into the `data/` directory. See [`data/README.md`](data/README.md) for a description of each file.
 
 ---
 
