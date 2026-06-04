@@ -135,37 +135,41 @@ for (pkg in bioc_packages) {
 message("All packages present.")
 message(strrep("─", 70))
 
-# ── Download input data from Google Drive ─────────────────────────────────────
+# ── Download input data from Zenodo ───────────────────────────────────────────
 
-gdrive_id  <- "172xgZPJNWO3eOR4can-9kSpgRIzwrv09"
-zip_path   <- "data/pax5_data.zip"
+zenodo_doi    <- "10.5281/zenodo.20545876"
+zenodo_id     <- sub(".*/", "", zenodo_doi)
+zenodo_api    <- paste0("https://zenodo.org/api/records/", zenodo_id)
 
 if (!dir.exists("data")) dir.create("data", recursive = TRUE)
 
-message("Downloading input data from Google Drive ...")
-
-# Use the direct download endpoint which bypasses the virus-scan warning page
-dl_url <- paste0(
-  "https://drive.usercontent.google.com/download?id=", gdrive_id,
-  "&export=download&authuser=0&confirm=t"
-)
+message("Fetching file list from Zenodo (", zenodo_doi, ") ...")
 
 tryCatch({
-  download.file(dl_url, destfile = zip_path, method = "curl", extra = "-L")
+  if (!requireNamespace("jsonlite", quietly = TRUE)) install.packages("jsonlite")
 
-  if (!file.exists(zip_path) || file.size(zip_path) < 10000) {
-    stop("Downloaded file is too small — download may have failed.")
+  meta      <- jsonlite::fromJSON(zenodo_api)
+  files_df  <- meta$files
+  rds_files <- files_df[grepl("\\.rds$", files_df$key), ]
+
+  if (nrow(rds_files) == 0) stop("No .rds files found in Zenodo record.")
+
+  message("Found ", nrow(rds_files), " files — downloading to data/ ...")
+
+  for (i in seq_len(nrow(rds_files))) {
+    fname  <- rds_files$key[i]
+    furl   <- rds_files$links$self[i]
+    fdest  <- file.path("data", fname)
+    message("  Downloading: ", fname)
+    download.file(furl, destfile = fdest, method = "curl", extra = "-L", quiet = FALSE)
   }
 
-  message("Unzipping data ...")
-  unzip(zip_path, exdir = "data")
-  file.remove(zip_path)
-  message("Data ready in data/")
+  message("All data files downloaded to data/")
 
 }, error = function(e) {
-  stop("Failed to download data: ", e$message,
-       "\nPlease download manually from: https://drive.google.com/file/d/",
-       gdrive_id, " and unzip into data/")
+  stop("Failed to download data from Zenodo: ", e$message,
+       "\nPlease download manually from: https://doi.org/", zenodo_doi,
+       " and place .rds files in data/")
 })
 
 message(strrep("─", 70))

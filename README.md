@@ -145,11 +145,11 @@ R version ≥ 4.2 is recommended.
 
 ## Data availability
 
-All input data files are downloaded automatically when running `main_script.R` from a public Google Drive archive. They can also be downloaded manually from:
+All input data files are downloaded automatically when running `main_script.R` from the Zenodo repository:
 
-> [https://drive.google.com/file/d/172xgZPJNWO3eOR4can-9kSpgRIzwrv09](https://drive.google.com/file/d/172xgZPJNWO3eOR4can-9kSpgRIzwrv09)
+> **DOI: [10.5281/zenodo.20545876](https://doi.org/10.5281/zenodo.20545876)**
 
-Unzip the archive into the `data/` directory. See [`data/README.md`](data/README.md) for a description of each file.
+Files can also be downloaded manually from Zenodo and placed in the `data/` directory. See [`data/README.md`](data/README.md) for a description of each file.
 
 ---
 
