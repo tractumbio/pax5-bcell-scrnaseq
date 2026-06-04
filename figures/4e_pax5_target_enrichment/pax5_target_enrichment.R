@@ -49,7 +49,7 @@ library(dplyr)
 library(ggplot2)
 library(fgsea)
 
-setwd("~/Desktop/Work/Bioinformatics/Pax5/github")
+# Assumes working directory is the repository root (set by main_script.R or manually)
 
 out_dir    <- "figures/4e_pax5_target_enrichment"
 cell_order <- c("PreproB", "ProB", "PreB", "Immature B", "FoB", "MzB")

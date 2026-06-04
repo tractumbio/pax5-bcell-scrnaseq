@@ -94,8 +94,15 @@
 #
 # ─────────────────────────────────────────────────────────────────────────────
 
-root_dir <- "~/Desktop/Work/Bioinformatics/Pax5/github"
+# Detect repo root from script location (works with both Rscript and source())
+root_dir <- tryCatch(
+  normalizePath(dirname(commandArgs(trailingOnly = FALSE) |>
+    (\(a) sub("--file=", "", a[startsWith(a, "--file=")]))() |>
+    (\(f) if (length(f)) f else stop("interactive"))()),
+  error = function(e) getwd()
+)
 setwd(root_dir)
+message("Working directory set to: ", root_dir)
 
 # ── Package installation ───────────────────────────────────────────────────────
 

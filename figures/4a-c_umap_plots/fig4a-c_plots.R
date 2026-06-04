@@ -30,7 +30,7 @@
 library(Seurat)
 library(ggplot2)
 
-setwd("~/Desktop/Work/Bioinformatics/Pax5/github")
+# Assumes working directory is the repository root (set by main_script.R or manually)
 
 out_dir <- "figures/4a-c_umap_plots"
 

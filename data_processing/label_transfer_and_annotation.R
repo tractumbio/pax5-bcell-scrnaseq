@@ -38,7 +38,7 @@ library(dplyr)
 library(stringr)
 library(ggplot2)
 
-setwd("~/Desktop/Work/Bioinformatics/Pax5/github")
+# Assumes working directory is the repository root (set by main_script.R or manually)
 
 # ── STEP 1: Preprocessing ─────────────────────────────────────────────────────
 
