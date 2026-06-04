@@ -95,12 +95,13 @@
 # ─────────────────────────────────────────────────────────────────────────────
 
 # Detect repo root from script location (works with both Rscript and source())
-root_dir <- tryCatch(
-  normalizePath(dirname(commandArgs(trailingOnly = FALSE) |>
-    (\(a) sub("--file=", "", a[startsWith(a, "--file=")]))() |>
-    (\(f) if (length(f)) f else stop("interactive"))()),
-  error = function(e) getwd()
-)
+args     <- commandArgs(trailingOnly = FALSE)
+file_arg <- args[startsWith(args, "--file=")]
+if (length(file_arg)) {
+  root_dir <- normalizePath(dirname(sub("--file=", "", file_arg)))
+} else {
+  root_dir <- getwd()
+}
 setwd(root_dir)
 message("Working directory set to: ", root_dir)
 
