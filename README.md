@@ -1,7 +1,6 @@
 # Pax5 Single-Cell Analysis
 
-Reproducible single-cell RNA-seq analysis accompanying the Pax5 manuscript.  
-This repository contains all code to reproduce the data processing pipeline and Figures 4a–e.
+Reproducible single-cell RNA-seq analysis accompanying the Pax5 manuscript.
 
 ---
 
