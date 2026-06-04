@@ -136,20 +136,17 @@ if (!dir.exists("data")) dir.create("data", recursive = TRUE)
 
 message("Downloading input data from Google Drive ...")
 
-dl_url <- paste0("https://drive.google.com/uc?export=download&id=", gdrive_id)
+# Use the direct download endpoint which bypasses the virus-scan warning page
+dl_url <- paste0(
+  "https://drive.usercontent.google.com/download?id=", gdrive_id,
+  "&export=download&authuser=0&confirm=t"
+)
 
 tryCatch({
-  download.file(dl_url, destfile = zip_path, method = "curl",
-                extra = "-L -c /tmp/gdrive_cookies.txt")
+  download.file(dl_url, destfile = zip_path, method = "curl", extra = "-L")
 
-  # Handle Google Drive large-file confirmation page
-  if (file.size(zip_path) < 10000) {
-    message("Large file confirmation required, retrying ...")
-    confirm_url <- paste0(
-      "https://drive.google.com/uc?export=download&confirm=t&id=", gdrive_id
-    )
-    download.file(confirm_url, destfile = zip_path, method = "curl",
-                  extra = "-L -b /tmp/gdrive_cookies.txt")
+  if (!file.exists(zip_path) || file.size(zip_path) < 10000) {
+    stop("Downloaded file is too small — download may have failed.")
   }
 
   message("Unzipping data ...")
