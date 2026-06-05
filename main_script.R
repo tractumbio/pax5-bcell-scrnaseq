@@ -15,7 +15,7 @@
 #
 #   b) Data download
 #      All input data files are downloaded automatically from the Zenodo
-#      archive (DOI 10.5281/zenodo.20545876) into data/. Includes the raw and
+#      archive (DOI 10.5281/zenodo.20553303) into data/. Includes the raw and
 #      annotated Seurat objects, the reference atlas, marker modules, Pax5
 #      target sets, combined VDJ contigs, and the MSigDB gene-set zip.
 #      See data/README.md for the full manifest.
@@ -109,7 +109,7 @@ message(strrep("─", 70))
 
 # ── Download input data from Zenodo ───────────────────────────────────────────
 
-zenodo_doi    <- "10.5281/zenodo.20545876"
+zenodo_doi    <- "10.5281/zenodo.20553303"
 zenodo_id     <- sub(".*zenodo\\.", "", zenodo_doi)
 zenodo_api    <- paste0("https://zenodo.org/api/records/", zenodo_id)
 

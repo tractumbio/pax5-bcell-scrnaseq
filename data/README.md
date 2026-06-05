@@ -4,7 +4,7 @@ The input data for this analysis are **not stored in git** (they are large
 binary files). They are archived on Zenodo and downloaded automatically by
 `main_script.R` on the first run.
 
-> **Download:** https://doi.org/10.5281/zenodo.20545876
+> **Download:** https://doi.org/10.5281/zenodo.20553303
 
 To set up manually instead, download the archive from the DOI above and place
 the files in this `data/` directory so it matches the manifest below.

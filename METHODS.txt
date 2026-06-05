@@ -201,14 +201,14 @@ sized by −log10(FDR).
   and BH FDR across genes; the replicate (mouse, n = 3 per genotype) is the unit
   for all per-genotype means ± s.e.m.
 - The complete pipeline is driven by main_script.R, which installs dependencies,
-  downloads data from Zenodo (DOI 10.5281/zenodo.20545876), and runs every step.
+  downloads data from Zenodo (DOI 10.5281/zenodo.20553303), and runs every step.
 - Software versions are recorded in session_info.txt.
 
 --------------------------------------------------------------------------------
 9. DATA AND CODE AVAILABILITY
 --------------------------------------------------------------------------------
 
-All processed input data are archived at Zenodo (DOI 10.5281/zenodo.20545876).
+All processed input data are archived at Zenodo (DOI 10.5281/zenodo.20553303).
 All analysis code is available in this repository
 (https://github.com/tractumbio/pax5-bcell-scrnaseq) and is released under the
 MIT License.

@@ -7,7 +7,7 @@ associated supporting data from a single command.
 - **Reference atlas:** Lee et al., *Nature Communications* (mouse B-cell atlas)
 - **Query data:** experimental scRNA-seq + 10x BCR (VDJ) of **wild-type (WT)**
   vs **Pax5-mutant (MUT)** mouse B cells
-- **Data archive (Zenodo):** https://doi.org/10.5281/zenodo.20545876
+- **Data archive (Zenodo):** https://doi.org/10.5281/zenodo.20553303
 
 ---
 
@@ -143,7 +143,7 @@ Rscript -e 'source("output/fig4/scripts/fig4d_pax5_diffexp.R")'
 
 All input files are archived on Zenodo and downloaded automatically:
 
-> **DOI: [10.5281/zenodo.20545876](https://doi.org/10.5281/zenodo.20545876)**
+> **DOI: [10.5281/zenodo.20553303](https://doi.org/10.5281/zenodo.20553303)**
 
 See [`data/README.md`](data/README.md) for the file manifest.
 
