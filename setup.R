@@ -16,7 +16,9 @@ cran_packages <- c(
 bioc_packages <- c(
   "Seurat",
   "SeuratObject",
-  "fgsea"
+  "fgsea",
+  "ComplexHeatmap",
+  "circlize"
 )
 
 if (!requireNamespace("BiocManager", quietly = TRUE)) install.packages("BiocManager")
@@ -45,6 +47,8 @@ library(stringr)
 library(pheatmap)
 library(RColorBrewer)
 library(fgsea)
+library(ComplexHeatmap)
+library(circlize)
 library(jsonlite)
 
 message("All packages loaded.")
