@@ -10,7 +10,12 @@ cran_packages <- c(
   "stringr",
   "pheatmap",
   "RColorBrewer",
-  "jsonlite"
+  "jsonlite",
+  "scales",
+  "tibble",
+  "purrr",
+  "emmeans",
+  "viridis"
 )
 
 bioc_packages <- c(
@@ -50,5 +55,10 @@ library(fgsea)
 library(ComplexHeatmap)
 library(circlize)
 library(jsonlite)
+library(scales)
+library(tibble)
+library(purrr)
+library(emmeans)
+library(viridis)
 
 message("All packages loaded.")

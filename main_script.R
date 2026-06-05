@@ -14,23 +14,18 @@
 #      stringr. No manual installation is needed.
 #
 #   b) Data download
-#      All input .rds files are downloaded automatically from a public Google
-#      Drive link as a single zip archive and extracted into data/. If the
-#      files are already present (e.g. on a second run), the download is
-#      skipped. The following files are downloaded:
-#        - anselm_demux_filtered.rds   raw query Seurat object
-#        - lee_etat_natcom_data.rds     published B-cell reference atlas
-#        - marker_modules.rds           mature B-cell marker gene modules
-#        - pax5_targets.rds             Pax5-activated and Pax5-repressed gene sets
-#      Note: anselm_labeled.rds is produced by Stage 1 and does not need
-#      to be downloaded.
+#      All input data files are downloaded automatically from the Zenodo
+#      archive (DOI 10.5281/zenodo.20545876) into data/. Includes the raw and
+#      annotated Seurat objects, the reference atlas, marker modules, Pax5
+#      target sets, combined VDJ contigs, and the MSigDB gene-set zip.
+#      See data/README.md for the full manifest.
 #
 #   c) Directory creation
-#      All output directories are created if they do not already exist.
+#      All output directories under output/ are created if they do not exist.
 #
 # ── STAGE 1: Data processing and annotation ───────────────────────────────────
 #
-#   Script: data_processing/label_transfer_and_annotation.R
+#   Script: output/data_processing/scripts/01_label_transfer_and_annotation.R
 #
 #   Both the reference (Lee et al., Nature Communications) and query datasets
 #   are normalised with SCTransform while regressing out cell cycle variation.
@@ -41,11 +36,11 @@
 #   Sub-types are collapsed into a cleaner set (FinalLab2), and Mature B clusters
 #   are further resolved into functional sub-types (FoB, MzB, GerminalCenter etc.)
 #   based on marker gene module scores (FinalLab3). The fully annotated object is
-#   saved to data/anselm_labeled.rds.
+#   saved to data/bcells_annotated.rds.
 #
 # ── STAGE 2: UMAP visualisations — Figures 4a-c ──────────────────────────────
 #
-#   Script: figures/4a-c_umap_plots/fig4a-c_plots.R
+#   Script: output/fig4/scripts/fig4abc_umap_and_markers.R
 #
 #   Four UMAP plots are generated and saved as PDFs: raw Seurat clusters,
 #   fine-grained labels (FinalLab), merged labels (FinalLab2), and mature B
@@ -55,7 +50,7 @@
 #
 # ── STAGE 3: Pax5 differential expression — Figure 4d ────────────────────────
 #
-#   Script: figures/4d_pax5_diffexp/pax5_DE_by_celltype.R
+#   Script: output/fig4/scripts/fig4d_pax5_diffexp.R
 #
 #   Pax5 expression is compared between MUT and WT cells within each B-cell
 #   stage using two complementary methods:
@@ -68,7 +63,7 @@
 #
 # ── STAGE 4: Pax5 target gene set enrichment — Figure 4e ─────────────────────
 #
-#   Script: figures/4e_pax5_target_enrichment/pax5_target_enrichment.R
+#   Script: output/fig4/scripts/fig4e_pax5_target_enrichment.R
 #
 #   Genome-wide differential expression (negative binomial, raw RNA counts)
 #   is run for every expressed gene in each B-cell stage (MUT vs WT). Genes
@@ -143,10 +138,25 @@ tryCatch({
 
   message("All data files downloaded to data/")
 
+  # Also download the MSigDB zip if not already present
+  msigdb_zip <- "data/msigdb_v2026.1.Mm_files_to_download_locally.zip"
+  if (!file.exists(msigdb_zip)) {
+    msigdb_files <- files_df[grepl("\\.zip$", files_df$key), ]
+    if (nrow(msigdb_files) > 0) {
+      message("  Downloading: ", msigdb_files$key[1])
+      download.file(msigdb_files$links$self[1], destfile = msigdb_zip,
+                    method = "curl", extra = "-L", quiet = FALSE)
+    } else {
+      message("  Note: MSigDB zip not found in Zenodo record — download manually if needed.")
+    }
+  } else {
+    message("  MSigDB zip already present — skipping.")
+  }
+
 }, error = function(e) {
   stop("Failed to download data from Zenodo: ", e$message,
        "\nPlease download manually from: https://doi.org/", zenodo_doi,
-       " and place .rds files in data/")
+       " and place files in data/")
 })
 
 message(strrep("─", 70))
@@ -155,10 +165,10 @@ message(strrep("─", 70))
 
 dirs <- c(
   "data",
-  "plots",
-  "figures/4a-c_umap_plots",
-  "figures/4d_pax5_diffexp",
-  "figures/4e_pax5_target_enrichment"
+  "output/data_processing/supporting_data",
+  "output/fig4/plots", "output/fig4/supporting_data",
+  "output/fig5/plots", "output/fig5/supporting_data",
+  "output/fig6/plots", "output/fig6/supporting_data"
 )
 
 for (d in dirs) {
@@ -190,10 +200,13 @@ run_script <- function(path) {
 
 t_start <- proc.time()
 
-run_script("data_processing/label_transfer_and_annotation.R")
-run_script("figures/4a-c_umap_plots/fig4a-c_plots.R")
-run_script("figures/4d_pax5_diffexp/pax5_DE_by_celltype.R")
-run_script("figures/4e_pax5_target_enrichment/pax5_target_enrichment.R")
+run_script("output/data_processing/scripts/01_label_transfer_and_annotation.R")
+run_script("output/fig4/scripts/fig4abc_umap_and_markers.R")
+run_script("output/fig4/scripts/fig4d_pax5_diffexp.R")
+run_script("output/fig4/scripts/fig4e_pax5_target_enrichment.R")
+run_script("output/fig5/scripts/fig5a_proB_deg_heatmaps.R")
+run_script("output/fig5/scripts/fig5b_proB_gsea.R")
+run_script("output/fig6/scripts/fig6_VDJ_analysis.R")
 
 total <- round((proc.time() - t_start)[["elapsed"]] / 60, 1)
 
@@ -201,7 +214,8 @@ message("\n", strrep("═", 70))
 message("PIPELINE COMPLETE — total runtime: ", total, " min")
 message(strrep("═", 70))
 message("\nOutput locations:")
-message("  Annotated object   →  data/anselm_labeled.rds")
-message("  Figure 4a-c        →  figures/4a-c_umap_plots/")
-message("  Figure 4d          →  figures/4d_pax5_diffexp/")
-message("  Figure 4e          →  figures/4e_pax5_target_enrichment/")
+message("  Annotated object   →  data/bcells_annotated.rds")
+message("  Data processing    →  output/data_processing/")
+message("  Figure 4 (a-e)     →  output/fig4/")
+message("  Figure 5 (a-b)     →  output/fig5/")
+message("  Figure 6 (VDJ)     →  output/fig6/")

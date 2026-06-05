@@ -1,43 +1,100 @@
-# Pax5 Single-Cell Analysis
+# Pax5 single-cell and BCR repertoire analysis
 
-Reproducible single-cell RNA-seq analysis accompanying the Pax5 manuscript.
+Reproducible analysis code accompanying the manuscript on Pax5 function across
+B-cell development. This repository regenerates **Figures 4–6** and all
+associated supporting data from a single command.
 
----
-
-## Overview
-
-We characterise Pax5 function across B-cell development using single-cell RNA-seq.  
-A published mouse B-cell atlas (Lee et al., *Nature Communications*) is used as a reference  
-to annotate an experimental query dataset comparing **wild-type (WT)** and **mutant (MUT)** animals.  
-Differential expression and gene set enrichment are then used to quantify how Pax5 loss  
-perturbs its transcriptional programme across discrete developmental stages.
+- **Reference atlas:** Lee et al., *Nature Communications* (mouse B-cell atlas)
+- **Query data:** experimental scRNA-seq + 10x BCR (VDJ) of **wild-type (WT)**
+  vs **Pax5-mutant (MUT)** mouse B cells
+- **Data archive (Zenodo):** https://doi.org/10.5281/zenodo.20545876
 
 ---
 
-## Repository structure
+## 1. What this repository produces
+
+| Figure | Analysis | Script |
+|--------|----------|--------|
+| 4a–c | UMAP of B-cell label annotation | `output/fig4/scripts/fig4abc_umap_and_markers.R` |
+| 4d (markers) | Canonical stage-marker dot plot | same script |
+| 4d (DE) | Pax5 differential expression (MUT vs WT) | `output/fig4/scripts/fig4d_pax5_diffexp.R` |
+| 4e | Pax5 target gene-set enrichment (fgsea) | `output/fig4/scripts/fig4e_pax5_target_enrichment.R` |
+| 5a | ProB DEG heatmaps | `output/fig5/scripts/fig5a_proB_deg_heatmaps.R` |
+| 5b | Per-stage gene-set enrichment (Hallmark/Reactome/GO/TF) | `output/fig5/scripts/fig5b_proB_gsea.R` |
+| 6 | BCR VDJ repertoire analysis | `output/fig6/scripts/fig6_VDJ_analysis.R` |
+
+---
+
+## 2. Repository layout
 
 ```
 .
-├── data/                          # Input data (not tracked — see data/README.md)
-├── plots/                         # Output directory for figures and tables
+├── README.md                 ← this file
+├── METHODS.txt               ← full methods text (for the manuscript)
+├── session_info.txt          ← exact R + package versions used
+├── main_script.R             ← single entry point: runs the whole pipeline
+├── setup.R                   ← installs + loads all required R packages
+├── LICENSE                   ← MIT (code)
+├── CITATION.cff              ← how to cite this repository
 │
-├── data_processing/
-│   └── label_transfer_and_annotation.R   # Full preprocessing and annotation pipeline
+├── data/                     ← input data (NOT in git; downloaded from Zenodo)
+│   └── README.md             ← data manifest + Zenodo link
 │
-└── figures/
-    ├── 4a-c_umap_plots/
-    │   └── fig4a-c_plots.R                # UMAP visualisations of B-cell labels
-    ├── 4d_pax5_diffexp/
-    │   └── pax5_DE_by_celltype.R          # Pax5 differential expression per cell type
-    └── 4e_pax5_target_enrichment/
-        └── pax5_target_enrichment.R       # Pax5 target gene set enrichment (fgsea)
+└── output/                   ← all generated results, organised per figure
+    ├── data_processing/
+    │   ├── scripts/          ← label transfer & annotation pipeline
+    │   └── supporting_data/  ← UMAP coordinates + label table
+    ├── fig4/
+    │   ├── scripts/          ← analysis code for Figure 4
+    │   ├── plots/            ← figure PDFs
+    │   └── supporting_data/  ← source-data CSVs / cached results
+    ├── fig5/  {scripts, plots, supporting_data}
+    └── fig6/  {scripts, plots, supporting_data}
+```
+
+Each figure folder is self-contained: the **code**, the **plots**, and the
+**source data** behind every panel live together.
+
+---
+
+## 3. System requirements
+
+- **Operating system:** macOS, Linux, or Windows
+- **R:** version **4.5.x** (developed on 4.5.1; see `session_info.txt`)
+- **RAM:** ≥ 16 GB recommended (integration + genome-wide DE are memory-heavy)
+- **Disk:** ~5 GB for data + outputs
+- **Internet:** required on first run (package install + Zenodo download)
+
+---
+
+## 4. Installing R
+
+**macOS**
+1. Install [R from CRAN](https://cran.r-project.org/bin/macosx/) (the `.pkg`).
+2. (Optional) Install [RStudio Desktop](https://posit.co/download/rstudio-desktop/).
+3. Command-line tools may be needed for some packages: `xcode-select --install`.
+
+**Linux (Ubuntu/Debian)**
+```bash
+sudo apt update
+sudo apt install r-base r-base-dev libcurl4-openssl-dev libssl-dev \
+                 libxml2-dev libfontconfig1-dev libharfbuzz-dev libfribidi-dev \
+                 libfreetype6-dev libpng-dev libtiff5-dev libjpeg-dev
+```
+
+**Windows**
+1. Install [R from CRAN](https://cran.r-project.org/bin/windows/base/).
+2. Install [Rtools](https://cran.r-project.org/bin/windows/Rtools/) (matching your R version).
+3. (Optional) Install [RStudio Desktop](https://posit.co/download/rstudio-desktop/).
+
+Verify:
+```bash
+R --version      # should report 4.5.x
 ```
 
 ---
 
-## Quickstart
-
-The entire analysis — from raw data to all figures — can be reproduced with a single command:
+## 5. Reproducing the analysis (one command)
 
 ```bash
 git clone https://github.com/tractumbio/pax5-bcell-scrnaseq.git
@@ -45,113 +102,59 @@ cd pax5-bcell-scrnaseq
 Rscript main_script.R
 ```
 
-`main_script.R` will automatically:
-1. **Install any missing R packages** (Seurat, fgsea, ggplot2, dplyr, tidyr, stringr)
-2. **Download all input data** from a public Google Drive link (~GB-scale zip archive, extracted into `data/`)
-3. **Run the full pipeline** in order and save all outputs into the `figures/` subfolders
+`main_script.R` will, in order:
+1. **Install** any missing CRAN/Bioconductor packages (via `setup.R`).
+2. **Download** all input data from Zenodo into `data/`.
+3. **Create** the `output/` directory tree.
+4. **Run** every figure script in dependency order and report timing.
 
-> **Note:** No manual data download or package installation is required. Runtime is approximately 45–90 minutes depending on hardware and internet speed.
+> **Runtime:** approximately **45–90 minutes** on a modern laptop. The label
+> transfer (Stage 1) and genome-wide negative-binomial DE (Fig 4e) are the
+> slowest steps. Fig 4e caches its DE result to
+> `output/fig4/supporting_data/pax5_target_DE_cache.rds`; delete this file to
+> force a re-run.
 
----
-
-## Reproducing the analysis step by step
-
-Individual scripts can also be run independently. All scripts must be run **from the repository root** so that relative paths resolve correctly.
-
-### Step 1 — Data processing and annotation
-
-```r
-source("data_processing/label_transfer_and_annotation.R")
+### Running a single figure
+Each script can be run on its own **from the repository root** (so relative
+paths resolve), provided the data are present and Stage 1 / Fig 4e have been
+run first where required:
+```bash
+Rscript -e 'source("output/fig4/scripts/fig4d_pax5_diffexp.R")'
 ```
 
-This script:
-- Preprocesses reference and query Seurat objects (cell cycle regression, SCTransform)
-- Integrates them using SCT-aware anchor-based integration
-- Transfers B-cell labels from the reference via majority-vote assignment
-- Sub-classifies Mature B clusters using marker gene module scores
-- Saves the fully annotated object to `data/anselm_labeled.rds`
+---
 
-> **Input:** `data/anselm_demux_filtered.rds`, `data/lee_etat_natcom_data.rds`, `data/marker_modules.rds`  
-> **Output:** `data/anselm_labeled.rds`, `plots/Fig4_umap_data.csv`
+## 6. Reproducibility notes
+
+- Exact package versions are listed in [`session_info.txt`](session_info.txt).
+- For a fully pinned environment, initialise [`renv`](https://rstudio.github.io/renv/)
+  before the first run:
+  ```r
+  install.packages("renv"); renv::init()
+  ```
+  then install the versions from `session_info.txt`.
+- Random seeds: Seurat steps (UMAP, clustering, integration) use Seurat's
+  internal defaults; minor numerical differences across platforms/BLAS builds
+  are expected but do not change the biological conclusions.
 
 ---
 
-### Step 2 — UMAP visualisations (Figures 4a–c)
+## 7. Data availability
 
-```r
-source("figures/4a-c_umap_plots/fig4a-c_plots.R")
-```
-
-Generates UMAP plots coloured by cluster identity, fine-grained labels (FinalLab),  
-merged labels (FinalLab2), and mature B sub-classification (FinalLab3).  
-Also exports a per-cell CSV with UMAP coordinates and all metadata.
-
-> **Input:** `data/anselm_labeled.rds`  
-> **Output:** `figures/4a-c_umap_plots/*.pdf`, `figures/4a-c_umap_plots/fig4_per_cell_metadata_umap.csv`
-
----
-
-### Step 3 — Pax5 differential expression (Figure 4d)
-
-```r
-source("figures/4d_pax5_diffexp/pax5_DE_by_celltype.R")
-```
-
-Tests Pax5 expression differences between MUT and WT cells within each B-cell stage  
-using two complementary methods:
-- **SCT / Wilcoxon** — on PrepSCTFindMarkers-corrected normalised data
-- **RNA / negative binomial** — on raw UMI counts
-
-Results are visualised as lollipop plots with dot size encoding % cells expressing Pax5.
-
-> **Input:** `data/anselm_labeled.rds`  
-> **Output:** `figures/4d_pax5_diffexp/*.csv`, `figures/4d_pax5_diffexp/*.pdf`
-
----
-
-### Step 4 — Pax5 target gene set enrichment (Figure 4e)
-
-```r
-source("figures/4e_pax5_target_enrichment/pax5_target_enrichment.R")
-```
-
-Runs genome-wide differential expression (negative binomial, RNA counts) per cell type,  
-then uses **fgsea** to test whether Pax5-activated and Pax5-repressed gene sets are  
-coordinately dysregulated in MUT cells. Genes are ranked by average log2 fold change.  
-DE results are cached on first run — subsequent runs skip the DE step automatically.
-
-> **Input:** `data/anselm_labeled.rds`, `data/pax5_targets.rds`  
-> **Output:** `figures/4e_pax5_target_enrichment/*.csv`, `figures/4e_pax5_target_enrichment/*.pdf`
-
----
-
-## Dependencies
-
-All required packages are checked and installed automatically when each script is run.  
-The analysis was developed with the following versions:
-
-| Package | Source |
-|---------|--------|
-| `Seurat` | Bioconductor / CRAN |
-| `fgsea` | Bioconductor |
-| `dplyr` | CRAN |
-| `ggplot2` | CRAN |
-| `stringr` | CRAN |
-
-R version ≥ 4.2 is recommended.
-
----
-
-## Data availability
-
-All input data files are downloaded automatically when running `main_script.R` from the Zenodo repository:
+All input files are archived on Zenodo and downloaded automatically:
 
 > **DOI: [10.5281/zenodo.20545876](https://doi.org/10.5281/zenodo.20545876)**
 
-Files can also be downloaded manually from Zenodo and placed in the `data/` directory. See [`data/README.md`](data/README.md) for a description of each file.
+See [`data/README.md`](data/README.md) for the file manifest.
 
 ---
 
-## Citation
+## 8. Citation
 
-> manuscript in preparation
+If you use this code, please cite the manuscript and this repository — see
+[`CITATION.cff`](CITATION.cff).
+
+## 9. License
+
+Code is released under the MIT License (see [`LICENSE`](LICENSE)). Data on
+Zenodo are released under their own (CC-BY) terms.

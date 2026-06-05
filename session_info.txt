@@ -1,0 +1,38 @@
+Software environment used to generate the results in this repository
+=====================================================================
+
+R version 4.5.1 (2025-06-13)
+Platform: aarch64-apple-darwin20 (64-bit, Apple Silicon)
+
+Key package versions
+---------------------
+  Seurat           5.5.0      (single-cell analysis)
+  SeuratObject     5.4.0
+  fgsea            1.34.2     (gene set enrichment)
+  ComplexHeatmap   2.24.1     (VDJ gene-usage heatmaps)
+  circlize         0.4.18
+  pheatmap         1.0.13     (DEG heatmaps)
+  ggplot2          4.0.3
+  dplyr            1.2.1
+  tidyr            1.3.2
+  stringr          1.6.0
+  purrr            1.2.2
+  tibble           3.3.1
+  emmeans          2.0.3      (VDJ post-hoc statistics)
+  RColorBrewer     1.1.3
+  viridis          0.6.5
+  scales           1.4.0
+  patchwork        1.3.2
+  jsonlite         2.0.0
+  BiocManager      1.30.27
+
+Notes
+-----
+* Bioconductor packages (Seurat, SeuratObject, fgsea, ComplexHeatmap, circlize)
+  were installed via BiocManager against Bioconductor 3.21 (matching R 4.5).
+* setup.R installs any missing packages automatically at run time, so exact
+  versions on a fresh machine may differ slightly. For byte-for-byte
+  reproducibility, pin the versions above (e.g. with renv::init() then
+  renv::install("Seurat@5.5.0"), etc.).
+* To capture the exact environment on YOUR machine after a run, execute:
+      writeLines(capture.output(sessionInfo()), "session_info_local.txt")

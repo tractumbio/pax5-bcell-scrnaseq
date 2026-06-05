@@ -1,0 +1,214 @@
+METHODS
+================================================================================
+Computational analysis of Pax5 single-cell RNA-seq and BCR repertoire data
+(Figures 4–6). This document describes every processing and analysis step in
+sufficient detail for independent reproduction. All code is provided in this
+repository; exact software versions are in session_info.txt.
+
+Unless otherwise stated, analyses were performed in R 4.5.1 using Seurat 5.5.0.
+Gene symbols are mouse (GRCm39 / Ensembl) gene symbols. Throughout, "WT" denotes
+wild-type and "MUT" denotes the Pax5-mutant genotype; six animals were profiled
+(three WT: WT1–WT3; three MUT: Mut1–Mut3).
+
+--------------------------------------------------------------------------------
+1. SINGLE-CELL RNA-SEQ PREPROCESSING AND REFERENCE-BASED ANNOTATION
+   (output/data_processing/scripts/01_label_transfer_and_annotation.R)
+--------------------------------------------------------------------------------
+
+1.1 Input objects
+    - Query: demultiplexed, quality-filtered single-cell gene-expression matrix
+      of WT and MUT B cells (bcells_raw_filtered.rds).
+    - Reference: a published mouse B-cell developmental atlas (Lee et al.,
+      Nature Communications; reference_atlas_lee.rds). The low-quality
+      "High Mitochondrial B" reference cluster was removed prior to analysis.
+
+1.2 Normalisation and cell-cycle correction
+    Both reference and query were log-normalised (NormalizeData) and assigned
+    cell-cycle phase scores with CellCycleScoring using the Seurat human S- and
+    G2M-phase gene sets converted to mouse orthologues by title-casing
+    (str_to_title). Each object was then re-normalised with SCTransform,
+    regressing out the S.Score and G2M.Score to remove cell-cycle variance.
+
+1.3 Dimensionality reduction and clustering (query)
+    The query was reduced by PCA, a shared-nearest-neighbour graph was built on
+    the first 40 principal components, and clusters were called with the Leiden
+    algorithm (FindClusters, algorithm = 4, resolution = 0.5). A UMAP embedding
+    was computed on the same 40 PCs.
+
+1.4 Reference–query integration
+    Integration features (n = 3000) were selected with SelectIntegrationFeatures
+    and SCT models prepared with PrepSCTIntegration. Anchors were identified with
+    FindIntegrationAnchors (normalization.method = "SCT") and the datasets
+    integrated with IntegrateData. The integrated object was re-embedded
+    (PCA → SNN graph → Leiden clustering, resolution 0.5 → UMAP) on 40 PCs.
+
+1.5 Label transfer and hierarchical annotation
+    Reference cell-type identities were transferred to query cells using
+    FindTransferAnchors (reference.reduction = "pca", 40 dims) and TransferData.
+    Three nested label columns were created:
+      - FinalLab : each query Leiden cluster was assigned the most frequent
+                   transferred label among its cells (majority vote), yielding
+                   fine-grained subtypes.
+      - FinalLab2: developmental collapse of FinalLab — all "Pro B" variants →
+                   "ProB"; all "Pre B"/"BCR" variants → "PreB".
+      - FinalLab3: clusters labelled "Mature B" were resolved into functional
+                   mature subtypes by AddModuleScore over curated marker modules
+                   (FoB, MzB, Germinal Center, Bmem, dark-zone, light-zone); each
+                   such cluster was assigned the subtype with the highest mean
+                   module score. FinalLab3 is the identity used in all downstream
+                   analyses.
+    Label spelling was standardised ("Prepro B" → "PreproB") so that the six
+    developmental stages are referenced consistently as:
+    PreproB, ProB, PreB, Immature B, FoB, MzB.
+
+    Output: data/bcells_annotated.rds and
+    output/data_processing/supporting_data/umap_coordinates_and_labels.csv.
+
+--------------------------------------------------------------------------------
+2. UMAP VISUALISATION AND MARKER VALIDATION — FIGURE 4a–d
+   (output/fig4/scripts/fig4abc_umap_and_markers.R)
+--------------------------------------------------------------------------------
+
+UMAP embeddings were plotted coloured by Leiden cluster and by each label level
+(FinalLab, FinalLab2, FinalLab3). To validate the annotation, a dot plot of
+canonical, literature-backed identity markers (five per stage) was generated
+from the SCT-normalised data, with cell types ordered along the developmental
+trajectory. Marker specificity was confirmed against per-stage mean expression;
+where a literature marker was non-specific in this dataset it was replaced by a
+dataset-specific equivalent from the same compartment (e.g. PreproB anchored on
+Cd7/Runx2/Flt3 rather than Ly6d).
+
+--------------------------------------------------------------------------------
+3. PAX5 DIFFERENTIAL EXPRESSION — FIGURE 4d
+   (output/fig4/scripts/fig4d_pax5_diffexp.R)
+--------------------------------------------------------------------------------
+
+Within each FinalLab3 stage, Pax5 expression was compared between MUT and WT
+cells (ident.1 = MUT, ident.2 = WT, so positive log2FC = higher in MUT) with
+two complementary tests:
+  (i)  SCT / Wilcoxon: after PrepSCTFindMarkers re-correction of the SCT model
+       across the compared cells, FindMarkers was run on the normalised SCT
+       "data" layer (Wilcoxon rank-sum). This is the Seurat-recommended approach
+       for SCT-normalised objects.
+  (ii) RNA / negative binomial: FindMarkers (test.use = "negbinom") on raw RNA
+       UMI counts, which models count over-dispersion and includes sequencing
+       depth as an offset. Raw counts (not normalised values) are the correct
+       input for this test.
+Stages with fewer than three cells in either genotype were skipped. Filtering
+thresholds were disabled (logfc.threshold = 0, min.pct = 0) so Pax5 was always
+tested. Results were drawn as lollipop plots (log2FC on x; stage on y; dot size =
+mean percentage of cells expressing Pax5, scaled 0–100 %) with adjusted p-values
+annotated.
+
+--------------------------------------------------------------------------------
+4. PAX5 TARGET GENE-SET ENRICHMENT — FIGURE 4e
+   (output/fig4/scripts/fig4e_pax5_target_enrichment.R)
+--------------------------------------------------------------------------------
+
+For each FinalLab3 stage, genome-wide differential expression (MUT vs WT) was
+computed with FindMarkers (test.use = "negbinom", raw RNA counts,
+logfc.threshold = 0, min.pct = 0); the per-stage result was cached
+(pax5_target_DE_cache.rds) to avoid recomputation. All tested genes were ranked
+by average log2 fold change (MUT vs WT) and the full ranked list supplied to
+fgsea (minSize = 5, maxSize = 500, nPermSimple = 10000) against two gene sets —
+genes activated and genes repressed by Pax5 (pax5_targets.rds). A negative NES
+for the activated set indicates coordinated down-regulation of Pax5 targets in
+MUT (consistent with loss of Pax5 function); a positive NES for the repressed
+set indicates de-repression. Enrichment was visualised as a lollipop plot of NES
+per stage, faceted by gene set (facet labels report the number of set genes
+detected in > 10 cells). Leading-edge genes for each significant enrichment were
+exported, together with their per-stage differential-expression statistics.
+
+--------------------------------------------------------------------------------
+5. ProB DIFFERENTIALLY EXPRESSED GENE HEATMAPS — FIGURE 5a
+   (output/fig5/scripts/fig5a_proB_deg_heatmaps.R)
+--------------------------------------------------------------------------------
+
+Using the cached genome-wide negative-binomial DE results (Section 4) for the
+ProB stage, the top differentially expressed genes were displayed as heatmaps.
+Each column is one biological replicate (WT1–3, Mut1–3); the value is the mean
+SCT-normalised expression of all ProB cells from that mouse, z-scored per gene.
+Three gene selections are provided: (a) top 30 up- and top 30 down-regulated by
+adjusted p-value within each direction; (b) top 60 by adjusted p-value
+irrespective of direction; (c) as (b) but retaining ribosomal-protein genes.
+Ribosomal-protein genes (symbols matching ^Rps or ^Rpl) were excluded from (a)
+and (b). Rows were annotated by direction of change (up/down in MUT).
+
+--------------------------------------------------------------------------------
+6. PER-STAGE GENE-SET ENRICHMENT — FIGURE 5b
+   (output/fig5/scripts/fig5b_proB_gsea.R)
+--------------------------------------------------------------------------------
+
+For every FinalLab3 stage, genes were ranked by average log2 fold change
+(MUT vs WT) from the cached DE results and tested with fgsea (minSize = 10,
+maxSize = 500, nPermSimple = 10000) against four MSigDB v2026.1 mouse
+collections (gene-symbol GMTs): Hallmark (mh.all), Reactome (m2.cp.reactome),
+GO Biological Process (m5.go.bp) and transcription-factor targets (m3.gtrd).
+Each collection was tested twice — using all genes, and after excluding
+ribosomal-protein genes (^Rps/^Rpl) from the ranked list — to confirm that
+enrichments were not driven by the ribosomal programme. Significant pathways
+(FDR < 0.05) were shown as lollipop plots of NES, coloured by direction and
+sized by −log10(FDR).
+
+--------------------------------------------------------------------------------
+7. BCR (VDJ) REPERTOIRE ANALYSIS — FIGURE 6
+   (output/fig6/scripts/fig6_VDJ_analysis.R)
+--------------------------------------------------------------------------------
+
+7.1 Contig processing
+    10x Cell Ranger filtered contig annotations for all six mice were combined
+    (vdj_contigs.rds) and restricted to cell-associated, productive, full-length
+    contigs. A cell was defined as "productive" if it carried any productive
+    full-length contig. Contig barcodes were matched to the annotated
+    single-cell object by barcode.
+
+7.2 Productive fraction by stage (Fig 6a–b)
+    Cells were mapped onto the UMAP and coloured by FinalLab3 (all cells and
+    productive cells). For each mouse and stage the productive fraction was
+    computed as productive / total cells; mice with cells but no productive BCR
+    contribute an explicit zero (they are not dropped), giving unbiased
+    per-genotype means ± s.e.m. (n = 3 mice per genotype).
+
+7.3 Clonotype expansion (Fig 6c)
+    Within each mouse, the fraction of cells belonging to each Cell Ranger
+    clonotype was computed (empty/None clonotype IDs excluded); the dominant
+    (most expanded) clonotype fraction per mouse was summarised per genotype as
+    mean ± s.e.m.
+
+7.4 Gene-segment usage and statistics (Fig 6d)
+    For each mouse and immunoglobulin chain (IGH, IGK, IGL), the proportion of
+    cells using each V/D/J/C gene was computed, with explicit zeros for genes
+    absent in a mouse (a gene absent in a mouse is a true 0, not missing data).
+    For genes present in both genotypes, WT vs MUT was tested with a
+    Gamma-family generalised linear model (Freq ~ Genotype * gene, log link)
+    followed by estimated marginal means contrasts (emmeans, ~ Genotype | gene).
+    p-values were corrected for multiple testing across all genes by the
+    Benjamini–Hochberg procedure (FDR). Genes detected in only one genotype
+    cannot be modelled by the GLM (one group is all-zero) and were recovered
+    separately as "genotype-exclusive" genes. Heatmaps (raw proportions and
+    per-gene z-scores), split by chain, display the FDR-significant and
+    genotype-exclusive genes, annotated by segment (V/D/J/C) and significance.
+
+--------------------------------------------------------------------------------
+8. STATISTICS AND REPRODUCIBILITY
+--------------------------------------------------------------------------------
+
+- Single-cell differential expression used Seurat's FindMarkers; p-values are
+  Benjamini–Hochberg adjusted (p_val_adj) across genes.
+- Gene-set enrichment p-values are fgsea adaptive-permutation p-values with BH
+  FDR (padj).
+- VDJ gene-usage comparisons used a Gamma GLM with emmeans post-hoc contrasts
+  and BH FDR across genes; the replicate (mouse, n = 3 per genotype) is the unit
+  for all per-genotype means ± s.e.m.
+- The complete pipeline is driven by main_script.R, which installs dependencies,
+  downloads data from Zenodo (DOI 10.5281/zenodo.20545876), and runs every step.
+- Software versions are recorded in session_info.txt.
+
+--------------------------------------------------------------------------------
+9. DATA AND CODE AVAILABILITY
+--------------------------------------------------------------------------------
+
+All processed input data are archived at Zenodo (DOI 10.5281/zenodo.20545876).
+All analysis code is available in this repository
+(https://github.com/tractumbio/pax5-bcell-scrnaseq) and is released under the
+MIT License.

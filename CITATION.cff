@@ -1,0 +1,27 @@
+cff-version: 1.2.0
+message: "If you use this software or data, please cite the manuscript and this repository."
+title: "Pax5 single-cell and BCR repertoire analysis"
+abstract: >-
+  Reproducible analysis code for single-cell RNA-seq and BCR (VDJ) repertoire
+  profiling of wild-type versus Pax5-mutant mouse B cells, generating Figures
+  4-6 of the accompanying manuscript.
+authors:
+  - family-names: Cioanca
+    given-names: Adrian
+type: software
+license: MIT
+repository-code: "https://github.com/tractumbio/pax5-bcell-scrnaseq"
+url: "https://github.com/tractumbio/pax5-bcell-scrnaseq"
+keywords:
+  - Pax5
+  - B-cell development
+  - single-cell RNA-seq
+  - BCR repertoire
+  - VDJ
+  - Seurat
+version: "1.0.0"
+date-released: "2026-06-05"
+identifiers:
+  - type: doi
+    value: "10.5281/zenodo.20545876"
+    description: "Zenodo archive of the input data"
