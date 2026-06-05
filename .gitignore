@@ -4,7 +4,6 @@ data/*.zip
 data/*.h5
 data/*.h5seurat
 data/*.xlsx
-data/msigdb_v2026.1.Mm_files_to_download_locally/
 # per-sample Cell Ranger VDJ folders (superseded by vdj_contigs.rds)
 data/WT1/
 data/WT2/

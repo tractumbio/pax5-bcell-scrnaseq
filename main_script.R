@@ -17,8 +17,8 @@
 #      All input data files are downloaded automatically from the Zenodo
 #      archive (DOI 10.5281/zenodo.20553303) into data/. Includes the raw and
 #      annotated Seurat objects, the reference atlas, marker modules, Pax5
-#      target sets, combined VDJ contigs, and the MSigDB gene-set zip.
-#      See data/README.md for the full manifest.
+#      target sets, combined VDJ contigs, and the MSigDB gene-set collections
+#      (msigdb_genesets.rds). See data/README.md for the full manifest.
 #
 #   c) Directory creation
 #      All output directories under output/ are created if they do not exist.
@@ -137,21 +137,6 @@ tryCatch({
   }
 
   message("All data files downloaded to data/")
-
-  # Also download the MSigDB zip if not already present
-  msigdb_zip <- "data/msigdb_v2026.1.Mm_files_to_download_locally.zip"
-  if (!file.exists(msigdb_zip)) {
-    msigdb_files <- files_df[grepl("\\.zip$", files_df$key), ]
-    if (nrow(msigdb_files) > 0) {
-      message("  Downloading: ", msigdb_files$key[1])
-      download.file(msigdb_files$links$self[1], destfile = msigdb_zip,
-                    method = "curl", extra = "-L", quiet = FALSE)
-    } else {
-      message("  Note: MSigDB zip not found in Zenodo record — download manually if needed.")
-    }
-  } else {
-    message("  MSigDB zip already present — skipping.")
-  }
 
 }, error = function(e) {
   stop("Failed to download data from Zenodo: ", e$message,

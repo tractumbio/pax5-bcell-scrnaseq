@@ -19,7 +19,9 @@
 #
 # INPUTS
 #   output/fig4/supporting_data/pax5_target_DE_RNA.csv
-#   data/msigdb_v2026.1.Mm_files_to_download_locally.zip
+#   data/msigdb_genesets.rds   (4 MSigDB v2026.1 mouse collections: hallmark,
+#                               reactome, gobp, tf)
+#   data/bcells_annotated.rds  (for the per-stage DEG heatmaps)
 #
 # OUTPUTS
 #   output/fig5/supporting_data/  — fgsea CSVs per cell type per collection
@@ -34,38 +36,23 @@ results_dir <- sdata_dir
 dir.create(results_dir, showWarnings = FALSE)
 dir.create(plots_dir,   showWarnings = FALSE)
 
-de_csv   <- "output/fig4/supporting_data/pax5_target_DE_RNA.csv"
-zip_file <- "data/msigdb_v2026.1.Mm_files_to_download_locally.zip"
-gmt_dir  <- "data/msigdb_v2026.1.Mm_files_to_download_locally/msigdb_v2026.1.Mm_GMTs"
+de_csv      <- "output/fig4/supporting_data/pax5_target_DE_RNA.csv"
+genesets_rds <- "data/msigdb_genesets.rds"
 
 cell_order <- c("PreproB", "ProB", "PreB", "Immature B", "FoB", "MzB")
 
-# ── Extract GMT files if needed ───────────────────────────────────────────────
-
-gmt_files <- list(
-  hallmark = file.path(gmt_dir, "mh.all.v2026.1.Mm.symbols.gmt"),
-  reactome = file.path(gmt_dir, "m2.cp.reactome.v2026.1.Mm.symbols.gmt"),
-  gobp     = file.path(gmt_dir, "m5.go.bp.v2026.1.Mm.symbols.gmt"),
-  tf       = file.path(gmt_dir, "m3.gtrd.v2026.1.Mm.symbols.gmt")
-)
-
-needed <- names(gmt_files)[!file.exists(unlist(gmt_files))]
-if (length(needed) > 0) {
-  message("Extracting missing GMT files ...")
-  zip_paths <- c(
-    hallmark = "msigdb_v2026.1.Mm_files_to_download_locally/msigdb_v2026.1.Mm_GMTs/mh.all.v2026.1.Mm.symbols.gmt",
-    reactome = "msigdb_v2026.1.Mm_files_to_download_locally/msigdb_v2026.1.Mm_GMTs/m2.cp.reactome.v2026.1.Mm.symbols.gmt",
-    gobp     = "msigdb_v2026.1.Mm_files_to_download_locally/msigdb_v2026.1.Mm_GMTs/m5.go.bp.v2026.1.Mm.symbols.gmt",
-    tf       = "msigdb_v2026.1.Mm_files_to_download_locally/msigdb_v2026.1.Mm_GMTs/m3.gtrd.v2026.1.Mm.symbols.gmt"
-  )
-  unzip(zip_file, files = zip_paths[needed], exdir = "data")
-}
-message("GMT files ready.")
-
 # ── Load gene sets ────────────────────────────────────────────────────────────
+# msigdb_genesets.rds is a named list of four MSigDB v2026.1 mouse collections
+# (gene-symbol): hallmark, reactome, gobp, tf. Each element is itself a named
+# list of gene sets. Derived from MSigDB and subject to the MSigDB terms of use.
+
+if (!file.exists(genesets_rds)) {
+  stop("Gene-set collections not found at: ", genesets_rds,
+       "\nDownload it from the Zenodo archive (see data/README.md).")
+}
 
 message("Loading gene sets ...")
-pathways <- lapply(gmt_files, gmtPathways)
+pathways <- readRDS(genesets_rds)
 message("  Hallmark: ", length(pathways$hallmark), " sets")
 message("  Reactome: ", length(pathways$reactome), " sets")
 message("  GO BP:    ", length(pathways$gobp),     " sets")

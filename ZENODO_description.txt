@@ -1,0 +1,75 @@
+ZENODO DEPOSIT — description and metadata
+(paste the "Description" block below into the Zenodo record;
+ the other fields map to Zenodo's metadata form)
+
+================================================================================
+TITLE
+================================================================================
+Processed single-cell RNA-seq and BCR repertoire data for Pax5 function across
+mouse B-cell development
+
+================================================================================
+DESCRIPTION  (paste into Zenodo "Description")
+================================================================================
+This deposit contains the processed input data required to reproduce the
+computational analyses (Figures 4–6) of our study of Pax5 function across
+B-cell development in the mouse. Wild-type (WT) and Pax5-mutant (MUT) B cells
+were profiled by single-cell RNA-sequencing and paired 10x single-cell BCR
+(VDJ) sequencing across six biological replicates (three WT: WT1–WT3; three
+MUT: Mut1–Mut3).
+
+All analysis code that consumes these files is openly available and will
+download this archive automatically:
+  GitHub:  https://github.com/tractumbio/pax5-bcell-scrnaseq
+
+Contents
+--------
+- bcells_raw_filtered.rds
+    Raw, quality-filtered query Seurat object (WT + MUT B cells); the starting
+    point for the data-processing pipeline.
+- bcells_annotated.rds
+    Fully annotated query Seurat object. B-cell identities were assigned by
+    SCT-based integration with, and label transfer from, the Lee et al.
+    reference atlas. Contains the FinalLab/FinalLab2/FinalLab3 label columns;
+    FinalLab3 stages are PreproB, ProB, PreB, Immature B, FoB, MzB. Provided so
+    that figures can be reproduced without re-running the (slow) annotation step.
+- reference_atlas_lee.rds
+    Published mouse B-cell developmental reference atlas (Lee et al., Nature
+    Communications), used for label transfer.
+- marker_modules.rds
+    Named list of curated marker-gene modules used to sub-classify mature B
+    cells (FoB, MzB, germinal-centre, memory, dark-/light-zone).
+- pax5_targets.rds
+    Named list of two gene sets: genes activated and genes repressed by Pax5.
+- vdj_contigs.rds
+    Combined 10x Cell Ranger filtered BCR contig annotations for all six mice,
+    with a Mouse column (used for the VDJ repertoire analysis, Figure 6).
+- msigdb_genesets.rds
+    The four MSigDB v2026.1 mouse gene-set collections used for gene-set
+    enrichment (Figure 5b): Hallmark, Reactome, GO Biological Process, and GTRD
+    transcription-factor targets (gene-symbol). Stored as a named list of named
+    gene-set lists. Derived from MSigDB and subject to the MSigDB terms of use
+    (https://www.gsea-msigdb.org/gsea/msigdb_license_terms.jsp).
+
+Reproduction
+------------
+Clone the GitHub repository and run `Rscript main_script.R`. The script installs
+the required R packages, downloads this archive into data/, and regenerates all
+figures and supporting tables. Software versions are recorded in the
+repository's session_info.txt (developed with R 4.5.1, Seurat 5.5.0).
+
+================================================================================
+SUGGESTED METADATA FIELDS
+================================================================================
+Resource type:   Dataset
+Authors / Creators: Cioanca, Adrian; [co-authors]
+License:         Creative Commons Attribution 4.0 International (CC BY 4.0)
+                 (note: the MSigDB zip is subject to the separate MSigDB
+                  terms of use)
+Keywords:        Pax5; B-cell development; single-cell RNA-seq; BCR repertoire;
+                 VDJ; immunoglobulin; Seurat; mouse; transcription factor
+Related identifiers:
+  - "is supplement to"   : the manuscript (add DOI once available)
+  - "is supplemented by" : https://github.com/tractumbio/pax5-bcell-scrnaseq
+                           (relation: "is documented by" / software)
+Language:        English

@@ -19,7 +19,7 @@ the files in this `data/` directory so it matches the manifest below.
 | `marker_modules.rds` | Named list of marker-gene modules for B-cell subtypes | data processing |
 | `pax5_targets.rds` | Named list: genes activated and genes repressed by Pax5 | Figure 4e |
 | `vdj_contigs.rds` | Combined 10x Cell Ranger filtered BCR contig annotations for all 6 mice (WT1–3, Mut1–3), with a `Mouse` column | Figure 6 |
-| `msigdb_v2026.1.Mm_files_to_download_locally.zip` | MSigDB v2026.1 mouse gene-set collections (GMT files); the needed collections are extracted automatically | Figure 5b |
+| `msigdb_genesets.rds` | The four MSigDB v2026.1 mouse gene-set collections used here — `hallmark`, `reactome`, `gobp`, `tf` (gene-symbol). A named list of named gene-set lists. Derived from MSigDB and subject to the [MSigDB terms of use](https://www.gsea-msigdb.org/gsea/msigdb_license_terms.jsp) | Figure 5b |
 
 ## Notes
 
