@@ -25,29 +25,7 @@
 #   pax5_fgsea_results.csv          — fgsea NES, p-value, FDR per gene set per cell type
 #   pax5_fgsea_enrichment_plot.pdf  — dot/bar summary plot of NES across cell types
 
-cran_packages <- c("dplyr", "ggplot2")
-bioc_packages <- c("Seurat", "fgsea")
-
-for (pkg in cran_packages) {
-  if (!requireNamespace(pkg, quietly = TRUE)) {
-    message("Installing CRAN package: ", pkg)
-    install.packages(pkg)
-  }
-}
-
-if (!requireNamespace("BiocManager", quietly = TRUE)) install.packages("BiocManager")
-
-for (pkg in bioc_packages) {
-  if (!requireNamespace(pkg, quietly = TRUE)) {
-    message("Installing Bioconductor package: ", pkg)
-    BiocManager::install(pkg, ask = FALSE)
-  }
-}
-
-library(Seurat)
-library(dplyr)
-library(ggplot2)
-library(fgsea)
+source("setup.R")
 
 # Assumes working directory is the repository root (set by main_script.R or manually)
 

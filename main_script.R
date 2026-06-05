@@ -105,34 +105,11 @@ if (length(file_arg)) {
 setwd(root_dir)
 message("Working directory set to: ", root_dir)
 
-# ── Package installation ───────────────────────────────────────────────────────
-
-cran_packages <- c("dplyr", "ggplot2", "ggrepel", "tidyr", "stringr")
-bioc_packages <- c("Seurat", "SeuratObject", "fgsea")
+# ── Package installation and loading ──────────────────────────────────────────
 
 message(strrep("─", 70))
-message("Checking required packages ...")
-
-if (!requireNamespace("BiocManager", quietly = TRUE)) {
-  message("Installing BiocManager ...")
-  install.packages("BiocManager")
-}
-
-for (pkg in cran_packages) {
-  if (!requireNamespace(pkg, quietly = TRUE)) {
-    message("Installing (CRAN): ", pkg)
-    install.packages(pkg)
-  }
-}
-
-for (pkg in bioc_packages) {
-  if (!requireNamespace(pkg, quietly = TRUE)) {
-    message("Installing (Bioconductor): ", pkg)
-    BiocManager::install(pkg, ask = FALSE, update = FALSE)
-  }
-}
-
-message("All packages present.")
+message("Checking and loading packages ...")
+source("setup.R")
 message(strrep("─", 70))
 
 # ── Download input data from Zenodo ───────────────────────────────────────────

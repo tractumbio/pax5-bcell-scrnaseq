@@ -19,10 +19,7 @@
 # and adjusted p-values are labelled on each point. A per-cell CSV combining all metadata
 # with Pax5 expression values from both assays is also exported.
 
-library(Seurat)
-library(dplyr)
-library(ggplot2)
-library(EBImage)
+source("setup.R")
 
 out_dir <- "figures/4d_pax5_diffexp"
 

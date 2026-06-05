@@ -33,10 +33,7 @@
 #   data/anselm_labeled.rds   — fully annotated Seurat object with FinalLab/2/3
 #   plots/Fig4_umap_data.csv  — UMAP coordinates + all label columns per cell
 
-library(Seurat)
-library(dplyr)
-library(stringr)
-library(ggplot2)
+source("setup.R")
 
 # Assumes working directory is the repository root (set by main_script.R or manually)
 

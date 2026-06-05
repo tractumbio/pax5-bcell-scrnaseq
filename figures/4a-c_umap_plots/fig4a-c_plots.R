@@ -27,8 +27,7 @@
 # This table can be used for statistical analyses or figure reproduction without
 # needing to reload the full Seurat object.
 
-library(Seurat)
-library(ggplot2)
+source("setup.R")
 
 # Assumes working directory is the repository root (set by main_script.R or manually)
 
