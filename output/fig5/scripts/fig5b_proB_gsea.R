@@ -22,8 +22,9 @@
 #   data/msigdb_v2026.1.Mm_files_to_download_locally.zip
 #
 # OUTPUTS
-#   output/fig5/supporting_data/  — CSVs per cell type per collection
-#   output/fig5/plots/    — lollipop PDFs per cell type per collection
+#   output/fig5/supporting_data/  — fgsea CSVs per cell type per collection
+#   output/fig5/plots/            — lollipop PDFs per cell type per collection,
+#                                   plus {Stage}_top60_heatmap.pdf per B-cell stage
 
 source("setup.R")
 
@@ -207,4 +208,92 @@ for (ct in cell_order) {
   }
 }
 
-message("\nDone. Results in ", results_dir, "\nPlots in ", plots_dir)
+message("\nGSEA done. Results in ", results_dir, "\nPlots in ", plots_dir)
+
+# ── Per-stage top-60 DEG heatmaps ─────────────────────────────────────────────
+# For each B-cell stage: top 30 up + top 30 down DEGs (by adjusted p-value within
+# each direction, Rps/Rpl excluded). Columns = biological replicates (WT1-3,
+# Mut1-3); values = mean SCT normalised expression per mouse, z-scored per gene.
+
+message("\nGenerating per-stage top-60 DEG heatmaps ...")
+
+library(pheatmap)
+library(RColorBrewer)
+
+seu <- readRDS("data/bcells_annotated.rds")
+Idents(seu) <- "FinalLab3"
+
+rep_order   <- c("WT1", "WT2", "WT3", "Mut1", "Mut2", "Mut3")
+sct_data    <- GetAssayData(seu, assay = "SCT", layer = "data")
+
+col_anno_df <- data.frame(
+  Genotype  = c("WT", "WT", "WT", "MUT", "MUT", "MUT"),
+  row.names = rep_order
+)
+anno_colours <- list(
+  Genotype  = c(WT = "#2166AC", MUT = "#D6604D"),
+  Direction = c("Up in MUT" = "#D6604D", "Down in MUT" = "#2166AC")
+)
+
+for (ct in cell_order) {
+
+  de_ct <- de_all %>%
+    filter(cell_type == ct, !grepl("^Rps|^Rpl", gene)) %>%
+    arrange(p_val_adj, desc(abs(avg_log2FC)))
+
+  if (nrow(de_ct) < 10) {
+    message("  Skipping ", ct, ": insufficient DE genes.")
+    next
+  }
+
+  top_up   <- de_ct %>% filter(avg_log2FC > 0) %>% arrange(p_val_adj) %>% head(30) %>% pull(gene)
+  top_down <- de_ct %>% filter(avg_log2FC < 0) %>% arrange(p_val_adj) %>% head(30) %>% pull(gene)
+  top_genes <- c(top_up, top_down)
+
+  ct_cells  <- WhichCells(seu, idents = ct)
+  meta_ct   <- seu@meta.data[ct_cells, ]
+  genes_use <- intersect(top_genes, rownames(sct_data))
+
+  avg_mat <- sapply(rep_order, function(rep) {
+    cells <- intersect(rownames(meta_ct[meta_ct$Mouse == rep, ]), ct_cells)
+    if (length(cells) == 0) return(rep(NA_real_, length(genes_use)))
+    if (length(cells) == 1) return(as.numeric(sct_data[genes_use, cells]))
+    rowMeans(as.matrix(sct_data[genes_use, cells]))
+  })
+  rownames(avg_mat) <- genes_use
+
+  avg_scaled <- t(scale(t(avg_mat)))
+  avg_scaled[is.nan(avg_scaled)] <- 0
+
+  direction   <- ifelse(de_ct$avg_log2FC[match(genes_use, de_ct$gene)] > 0,
+                        "Up in MUT", "Down in MUT")
+  row_anno_df <- data.frame(Direction = direction, row.names = genes_use)
+
+  cell_h_pts <- 10
+  plot_h     <- (nrow(avg_scaled) * cell_h_pts / 72) + 2.5
+  ct_slug    <- gsub(" ", "_", ct)
+
+  options(bitmapType = "quartz")
+  pdf(file.path(plots_dir, paste0(ct_slug, "_top60_heatmap.pdf")),
+      width = 6, height = plot_h)
+  pheatmap(
+    avg_scaled,
+    color             = colorRampPalette(rev(brewer.pal(11, "RdBu")))(100),
+    cluster_cols      = FALSE,
+    cluster_rows      = TRUE,
+    show_rownames     = TRUE,
+    show_colnames     = TRUE,
+    annotation_col    = col_anno_df,
+    annotation_row    = row_anno_df,
+    annotation_colors = anno_colours,
+    cellheight        = cell_h_pts,
+    fontsize_row      = 8,
+    fontsize_col      = 10,
+    border_color      = NA,
+    main              = paste0(ct, " top 60 DEGs (MUT vs WT, Rps/Rpl excluded)")
+  )
+  dev.off()
+  message("  Saved: ", ct_slug, "_top60_heatmap.pdf")
+}
+
+message("\nDone. All fig5b outputs saved under output/fig5/")
